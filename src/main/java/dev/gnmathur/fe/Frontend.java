@@ -11,7 +11,8 @@ public class Frontend {
 
     public static void frontend(String[] args) {
         Javalin app = Javalin.create(javalinConfig -> {
-            //javalinConfig.useVirtualThreads = true;
+            javalinConfig.useVirtualThreads = true;
+            javalinConfig.showJavalinBanner = false;
         }).start(7000);
 
         app.get("/search", Frontend::handleSearch);

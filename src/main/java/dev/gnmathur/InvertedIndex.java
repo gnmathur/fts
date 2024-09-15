@@ -8,7 +8,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InvertedIndex {
-    // Using RoaringBitmap for more efficient bitmaps instead of HashSet<Long>
     private final ConcurrentHashMap<String, Roaring64Bitmap> index = new ConcurrentHashMap<>();
     private final HashMap<Long, String> idToTitle = new HashMap<>();
     private final HashMap<Long, String> idToAbstract = new HashMap<>();
@@ -25,19 +24,24 @@ public class InvertedIndex {
 
     public Roaring64Bitmap searchIndex(String searchString) {
         String[] searchTokens = Analyzer.analyze(searchString);
+        Roaring64Bitmap result = null;
 
-        if (searchTokens.length == 0) {
-            return new Roaring64Bitmap();  // Return early if no tokens
+        for (String str : searchTokens) {
+            Roaring64Bitmap bitmap = index.get(str);
+
+            if (bitmap != null) {
+                if (result == null) {
+                    // Initialize the result with the first bitmap
+                    result = new Roaring64Bitmap();
+                    result.or(bitmap);  // Make a copy of the first bitmap
+                } else {
+                    // Perform intersection with the next bitmap
+                    result.and(bitmap);
+                }
+            }
         }
 
-        return Arrays.stream(searchTokens)
-                .map(index::get)
-                .filter(Objects::nonNull)  // Avoid null bitmaps
-                .reduce((bitmap1, bitmap2) -> {
-                    bitmap1.and(bitmap2);  // Modify bitmap1 in place
-                    return bitmap1;         // Return bitmap1 for further reduction
-                })
-                .orElse(new Roaring64Bitmap());  // Return empty bitmap if no results
+        return result;  // May return null if no strings had bitmaps
     }
 
     // Get title by document ID
