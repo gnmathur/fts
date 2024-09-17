@@ -12,6 +12,8 @@ public class StopWordFilter implements Filter {
     @Override
     public String[] filter(String[] text) {
         // Remove stop words from the text
-        return java.util.Arrays.stream(text).filter(word -> !stopWords.contains(word)).toArray(String[]::new);
+        return java.util.Arrays.stream(text)
+                .filter(word -> !stopWords.contains(word))
+                .toArray(String[]::new);
     }
 }

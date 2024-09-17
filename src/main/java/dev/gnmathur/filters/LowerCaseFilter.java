@@ -1,12 +1,12 @@
 package dev.gnmathur.filters;
 
+import java.util.Arrays;
+
 public class LowerCaseFilter implements Filter {
     @Override
     public String[] filter(String[] text) {
-        // Convert the text to lower case
-        for (int i = 0; i < text.length; i++) {
-            text[i] = text[i].toLowerCase();
-        }
-        return text;
+        return Arrays.stream(text)
+                .map(String::toLowerCase)
+                .toArray(String[]::new);
     }
 }

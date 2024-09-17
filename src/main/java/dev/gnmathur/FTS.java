@@ -6,10 +6,12 @@ import dev.gnmathur.fe.Frontend;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 public class FTS {
-    static final InvertedIndex index = new InvertedIndex();
+    private static final InvertedIndex index = new InvertedIndex();
+    private static final Logger logger = Logger.getLogger(FTS.class.getName());
 
     public static record Tuple(String title, String abstractText) {
     }
@@ -18,15 +20,14 @@ public class FTS {
         var start = System.nanoTime();
 
         var searchResult = index.searchIndex(text);
-        // Create list of Title and Abstract tuples
+
         List<Tuple> results = new ArrayList<>();
-        // Find the long values in RoaringBitmap and get the title and abstract
+
         var longIterator = searchResult.getLongIterator();
         while (longIterator.hasNext()) {
             long docId = longIterator.next();
             results.add(new Tuple(index.getTitle(docId), index.getAbstract(docId)));
         }
-        // System.out.println("Search time: " + (System.nanoTime() - start) + "ns");
 
         return results;
     }
@@ -36,20 +37,20 @@ public class FTS {
 
         Long start = System.currentTimeMillis();
         InputStream is = new GZIPInputStream(new FileInputStream(fileURI));
-        System.out.println("Loading time: " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Loading time: " + (System.currentTimeMillis() - start) + "ms");
 
         // Step 2: Parse the XML content and get a list of WikiEntry objects
         start = System.currentTimeMillis();
         List<WikiEntry> entries = WikipediaDocumentParser.parse(is);
-        System.out.println("Parsing time: " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Parsing time: " + (System.currentTimeMillis() - start) + "ms");
 
         start = System.currentTimeMillis();
         for (WikiEntry entry : entries) {
             var result = Analyzer.analyze(entry.abstractText());
             index.addToIndex(result, entry.id(), entry.title(), entry.abstractText());
         }
-        System.out.println("Indexing time: " + (System.currentTimeMillis() - start) + "ms");
-        System.out.println("Index size: " + index.size());
+        logger.info("Indexing time: " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Index size: " + index.size());
 
         Frontend.frontend(args);
     }

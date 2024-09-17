@@ -24,7 +24,6 @@ public class WikipediaDocumentParser {
         StringBuilder url = new StringBuilder();
         StringBuilder abstractText = new StringBuilder();
 
-        // Temporary variables for batching parsed data
         String tempTitle = null;
         String tempUrl = null;
         String tempAbstract = null;
@@ -32,18 +31,15 @@ public class WikipediaDocumentParser {
         while (eventReader.hasNext()) {
             XMLEvent event = eventReader.nextEvent();
 
-            // Handle the start of an element
             if (event.isStartElement()) {
                 StartElement startElement = event.asStartElement();
                 currentElement = startElement.getName().getLocalPart();
             }
 
-            // Handle character data (text between tags)
             if (event.isCharacters() && currentElement != null) {
                 Characters characters = event.asCharacters();
                 String data = characters.getData();
 
-                // Append the data directly without trimming or additional processing
                 switch (currentElement) {
                     case "title":
                         title.append(data);
@@ -57,11 +53,9 @@ public class WikipediaDocumentParser {
                 }
             }
 
-            // Handle the end of an element
             if (event.isEndElement()) {
                 String endElementName = event.asEndElement().getName().getLocalPart();
 
-                // When we reach the end of a "doc" element, create a new WikiEntry
                 if (endElementName.equals("doc")) {
                     if (!title.isEmpty() && !url.isEmpty() && !abstractText.isEmpty()) {
                         tempTitle = title.toString();
@@ -71,7 +65,6 @@ public class WikipediaDocumentParser {
                         entries.add(new WikiEntry(tempTitle, tempUrl, tempAbstract, id));
                     }
 
-                    // Reset the StringBuilder for the next entry
                     title.setLength(0);
                     url.setLength(0);
                     abstractText.setLength(0);
