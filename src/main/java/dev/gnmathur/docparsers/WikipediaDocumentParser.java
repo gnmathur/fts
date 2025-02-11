@@ -1,6 +1,6 @@
 package dev.gnmathur.docparsers;
 
-import dev.gnmathur.WikiEntry;
+import dev.gnmathur.Document;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -14,11 +14,11 @@ import java.util.List;
 public class WikipediaDocumentParser {
     private static final XMLInputFactory factory = XMLInputFactory.newInstance();
 
-    public static List<WikiEntry> parse(InputStream xmlInputStream) throws Exception {
+    public static List<Document> parse(InputStream xmlInputStream) throws Exception {
         XMLEventReader eventReader = factory.createXMLEventReader(xmlInputStream);
         Long id = 0L;
 
-        List<WikiEntry> entries = new ArrayList<>();
+        List<Document> entries = new ArrayList<>();
         String currentElement = null;
         StringBuilder title = new StringBuilder();
         StringBuilder url = new StringBuilder();
@@ -62,7 +62,7 @@ public class WikipediaDocumentParser {
                         tempUrl = url.toString();
                         tempAbstract = abstractText.toString();
                         id++;
-                        entries.add(new WikiEntry(tempTitle, tempUrl, tempAbstract, id));
+                        entries.add(new Document(id, tempTitle, tempAbstract));
                     }
 
                     title.setLength(0);

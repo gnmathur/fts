@@ -4,6 +4,7 @@ import dev.gnmathur.filters.LowerCaseFilter;
 import dev.gnmathur.filters.StemmerFilter;
 import dev.gnmathur.filters.StopWordFilter;
 
+/** An analyzer that tokenizes, lowercases, removes stop words, and stems text. */
 public class Analyzer {
     private static final LowerCaseFilter lowerCaseFilter = new LowerCaseFilter();
     private static final StopWordFilter stopWordFilter = new StopWordFilter();
@@ -12,9 +13,9 @@ public class Analyzer {
     public static String[] analyze(final String entry) {
         String[] tokens = Tokenizer.tokenize(entry);
 
-        var lowerCaseFiltered = lowerCaseFilter.filter(tokens);
-        var stopWordFiltered= stopWordFilter.filter(lowerCaseFiltered);
-        var stemmed = stemmerFilter.filter(stopWordFiltered);
+        final var lowerCaseFiltered = lowerCaseFilter.filter(tokens);
+        final var stopWordFiltered= stopWordFilter.filter(lowerCaseFiltered);
+        final var stemmed = stemmerFilter.filter(stopWordFiltered);
 
         return stemmed;
     }

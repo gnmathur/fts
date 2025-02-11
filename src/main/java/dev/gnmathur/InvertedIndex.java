@@ -1,27 +1,41 @@
 package dev.gnmathur;
 
 import org.roaringbitmap.longlong.Roaring64Bitmap;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+/** An in-memory inverted index. */
 public class InvertedIndex {
-    private final ConcurrentHashMap<String, Roaring64Bitmap> index = new ConcurrentHashMap<>();
-    private final HashMap<Long, String> idToTitle = new HashMap<>();
-    private final HashMap<Long, String> idToAbstract = new HashMap<>();
+    /** The key data structure for the inverted index - a map from token to a bitmap of document IDs. */
+    public final ConcurrentHashMap<String, Roaring64Bitmap> index;
+    /** A map from document ID to document. */
+    public final HashMap<Long, Document> documents;
 
-    public void addToIndex(String[] tokens, long docId, String title, String abstractText) {
-        int docIdInt = (int) docId;
-        Arrays.stream(tokens).forEach(token ->
-                index.computeIfAbsent(token, k -> new Roaring64Bitmap()).add(docIdInt)
-        );
-        idToTitle.put(docId, title);
-        idToAbstract.put(docId, abstractText);
+    public InvertedIndex(ConcurrentHashMap<String, Roaring64Bitmap> index, HashMap<Long, Document> documents) {
+        this.index = index;
+        this.documents = documents;
     }
 
-    public Roaring64Bitmap searchIndex(String searchString) {
-        String[] searchTokens = Analyzer.analyze(searchString);
+    public InvertedIndex() {
+        this.index = new ConcurrentHashMap<>();
+        this.documents = new HashMap<>();
+    }
+
+    /** Add a document to the index. The document is tokenized and each token is added to the index. */
+    public void addToIndex(final Document document) {
+        final int docIdInt = (int)document.id();
+        final String[] docTokens = Analyzer.analyze(document.abstractText());
+
+        Arrays.stream(docTokens).forEach(token ->
+                index.computeIfAbsent(token, k -> new Roaring64Bitmap()).add(docIdInt)
+        );
+        documents.put(document.id(), document);
+    }
+
+    /** Search the index for the given search string. Returns a bitmap of document IDs that contain the search string. */
+    public Roaring64Bitmap searchIndex(final String searchString) {
+        final String[] searchTokens = Analyzer.analyze(searchString);
         Roaring64Bitmap result = null;
 
         for (String str : searchTokens) {
@@ -40,14 +54,7 @@ public class InvertedIndex {
         return result;
     }
 
-    public String getTitle(long docId) {
-        return idToTitle.get(docId);
-    }
-    public String getAbstract(long docId) {
-        return idToAbstract.get(docId);
-    }
-
-    public int size() {
-        return index.size();
-    }
+    public String getTitle(final long docId) { return documents.get(docId).title(); }
+    public String getAbstract(final long docId) { return documents.get(docId).abstractText(); }
+    public int size() { return index.size(); }
 }
