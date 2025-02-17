@@ -2,6 +2,7 @@ package dev.gnmathur;
 
 import dev.gnmathur.docparsers.WikipediaDocumentParser;
 import dev.gnmathur.fe.Frontend;
+import dev.gnmathur.fe.Tuple;
 import dev.gnmathur.utils.Timer;
 import org.rocksdb.RocksDBException;
 import org.slf4j.Logger;

@@ -6,7 +6,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import dev.gnmathur.FTS;
-import dev.gnmathur.Tuple;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.slf4j.Logger;
